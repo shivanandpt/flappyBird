@@ -49,12 +49,17 @@ function love.keypressed(key)
     if key == 'escape' then
         love.event.quit()
     end
+    if key == 'space' then
+        -- make it fly
+    end
 end
 
 function love.update(dt)
     backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt) % BACKGROUND_LOOPING_POINT
 
     groundScroll = (groundScroll + GROUND_SCROLL_SPEED * dt) % BACKGROUND_LOOPING_POINT
+
+    bird:update(dt)
 end
 
 function love.draw()
