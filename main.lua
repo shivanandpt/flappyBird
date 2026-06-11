@@ -36,7 +36,7 @@ function love.load()
         fullscreen = false,
         resizable = true
     })
-
+    love.keyboard.keysPressed = {}
     -- initialize our virtual resolution
     push.setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, { upscale = 'normal' })
 end
@@ -46,6 +46,7 @@ function love.resize(w, h)
 end
 
 function love.keypressed(key)
+    love.keyboard.keysPressed[key] = true
     if key == 'escape' then
         love.event.quit()
     end
@@ -60,6 +61,14 @@ function love.update(dt)
     groundScroll = (groundScroll + GROUND_SCROLL_SPEED * dt) % BACKGROUND_LOOPING_POINT
 
     bird:update(dt)
+    love.keyboard.keysPressed = {}
+end
+
+function love.keyboard.wasPressed(key)
+    if love.keyboard.keysPressed[key] then
+        return true
+    end 
+    return false
 end
 
 function love.draw()
