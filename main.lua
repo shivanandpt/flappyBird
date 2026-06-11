@@ -1,7 +1,8 @@
 
 -- virtual resolution handling library
 push = require 'push'
-
+Class = require 'class'
+require 'Bird'
 -- physical screen dimensions
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
@@ -25,7 +26,7 @@ function love.load()
     -- images we load into memory from files to later draw onto the screen
     background = love.graphics.newImage('background.png')
     ground = love.graphics.newImage('ground.png')
-
+    bird = Bird()
     -- app window title
     love.window.setTitle('Fifty Bird')
 
@@ -65,5 +66,7 @@ function love.draw()
     -- draw the ground on top of the background, toward the bottom of the screen
     love.graphics.draw(ground, -backgroundScroll, VIRTUAL_HEIGHT - 16)
 
+    love.graphics.draw(ground, 0, VIRTUAL_HEIGHT - 16)
+    bird:render()
     push.finish()
 end
