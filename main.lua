@@ -3,6 +3,7 @@
 push = require 'push'
 Class = require 'class'
 require 'Bird'
+require 'Pipe'
 -- physical screen dimensions
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
@@ -18,6 +19,10 @@ local BACKGROUND_SCROLL_SPEED = 30
 local GROUND_SCROLL_SPEED = 60
 
 local BACKGROUND_LOOPING_POINT = 413
+
+local spawnTime = 2
+
+pipes = {}
 
 function love.load()
     -- initialize our nearest-neighbor filter
@@ -59,8 +64,18 @@ function love.update(dt)
     backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt) % BACKGROUND_LOOPING_POINT
 
     groundScroll = (groundScroll + GROUND_SCROLL_SPEED * dt) % BACKGROUND_LOOPING_POINT
-
+    if (spawnTime > 2) then
+        table.insert(pipes, Pipe())
+        spawnTime = 0
+    end
+    spawnTime = spawnTime + dt
     bird:update(dt)
+    for key, pipe in pairs(pipes) do 
+        pipe:update(dt)
+        if pipe.x < -pipe.width then
+            table.remove(pipes, key)
+        end
+    end 
     love.keyboard.keysPressed = {}
 end
 
@@ -76,11 +91,11 @@ function love.draw()
 
     -- draw the background starting at top left (0, 0)
     love.graphics.draw(background, -backgroundScroll, 0)
-
+    for key, pipe in pairs(pipes) do 
+        pipe:render()
+    end 
     -- draw the ground on top of the background, toward the bottom of the screen
     love.graphics.draw(ground, -backgroundScroll, VIRTUAL_HEIGHT - 16)
-
-    love.graphics.draw(ground, 0, VIRTUAL_HEIGHT - 16)
     bird:render()
     push.finish()
 end
