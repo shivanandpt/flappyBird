@@ -15,6 +15,7 @@ VIRTUAL_HEIGHT = 288
 
 local backgroundScroll = 0
 local groundScroll = 0
+local scrolling = true
 
 local BACKGROUND_SCROLL_SPEED = 30
 local GROUND_SCROLL_SPEED = 60
@@ -64,24 +65,30 @@ function love.keypressed(key)
 end
 
 function love.update(dt)
-    backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt) % BACKGROUND_LOOPING_POINT
-
-    groundScroll = (groundScroll + GROUND_SCROLL_SPEED * dt) % BACKGROUND_LOOPING_POINT
-    if (spawnTimer > 2) then
-        local y = math.max(-PIPE_HEIGHT + 10,
-    math.min(lastY + math.random(-20, 20), VIRTUAL_HEIGHT - 90 - PIPE_HEIGHT))
-        lastY = y
-        table.insert(pipePairs, PipePair(y))
-        spawnTimer = 0
-    end
-    spawnTimer = spawnTimer + dt
-    bird:update(dt)
-    for key, pair in pairs(pipePairs) do 
-        pair:update(dt)
-    end
-    for key, pair in pairs(pipePairs) do
-        if pair.remove then
-            table.remove(pipePairs, key)
+    if scrolling then
+        backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt) % BACKGROUND_LOOPING_POINT
+        groundScroll = (groundScroll + GROUND_SCROLL_SPEED * dt) % BACKGROUND_LOOPING_POINT
+        if (spawnTimer > 2) then
+            local y = math.max(-PIPE_HEIGHT + 10,
+        math.min(lastY + math.random(-20, 20), VIRTUAL_HEIGHT - 90 - PIPE_HEIGHT))
+            lastY = y
+            table.insert(pipePairs, PipePair(y))
+            spawnTimer = 0
+        end
+        spawnTimer = spawnTimer + dt
+        bird:update(dt)
+        for key, pair in pairs(pipePairs) do 
+            pair:update(dt)
+            for _, pipe in pairs(pair.pipes) do
+                if bird:collides(pipe) then
+                    scrolling = false
+                end
+            end
+        end
+        for key, pair in pairs(pipePairs) do
+            if pair.remove then
+                table.remove(pipePairs, key)
+            end
         end
     end
     love.keyboard.keysPressed = {}
@@ -98,6 +105,7 @@ function love.draw()
     push.start()
 
     -- draw the background starting at top left (0, 0)
+    
     love.graphics.draw(background, -backgroundScroll, 0)
     for _, pair in pairs(pipePairs) do 
         pair:render()
