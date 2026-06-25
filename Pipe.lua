@@ -1,4 +1,4 @@
-PIPE_IMAGE = love.graphics.newImage('pipe.png')
+PIPE_IMAGE = love.graphics.newImage('images/pipe.png')
 PIPE_HEIGHT = 288
 PIPE_WIDTH = 70
 Pipe = Class{}
