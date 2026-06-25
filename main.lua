@@ -10,6 +10,7 @@ require 'states.BaseState'
 require 'states.PlayState'
 require 'states.TitleScreenState'
 require 'states.ScoreState'
+require 'states.CountdownState'
 -- physical screen dimensions
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
@@ -33,15 +34,15 @@ function love.load()
     love.graphics.setDefaultFilter('nearest', 'nearest')
 
     -- images we load into memory from files to later draw onto the screen
-    background = love.graphics.newImage('background.png')
-    ground = love.graphics.newImage('ground.png')
+    background = love.graphics.newImage('images/background.png')
+    ground = love.graphics.newImage('images/ground.png')
     
     -- app window title
     love.window.setTitle('Fifty Bird')
-    smallFont = love.graphics.newFont('font.ttf', 8)
-    mediumFont = love.graphics.newFont('flappy.ttf', 14)
-    flappyFont = love.graphics.newFont('flappy.ttf', 28)
-    hugeFont = love.graphics.newFont('flappy.ttf', 56)
+    smallFont = love.graphics.newFont('fonts/font.ttf', 8)
+    mediumFont = love.graphics.newFont('fonts/flappy.ttf', 14)
+    flappyFont = love.graphics.newFont('fonts/flappy.ttf', 28)
+    hugeFont = love.graphics.newFont('fonts/flappy.ttf', 56)
     love.graphics.setFont(flappyFont)
 
     -- initialize window
@@ -50,13 +51,24 @@ function love.load()
         fullscreen = false,
         resizable = true
     })
+    gSound= {
+        ['music'] = love.audio.newSource('sounds/marios_way.mp3', 'static'),
+        ['explosion'] = love.audio.newSource('sounds/explosion.wav', 'static'),
+        ['hurt'] = love.audio.newSource('sounds/hurt.wav', 'static'),
+        ['jump'] = love.audio.newSource('sounds/jump.wav', 'static'),
+        ['score'] = love.audio.newSource('sounds/score.wav', 'static')
+    }
     love.keyboard.keysPressed = {}
+    love.mouse.buttonPressed = {}
     gStateMachine = StateMachine {
         ['play'] = function() return PlayState() end,
         ['title'] = function() return TitleScreenState() end,
-        ['score'] = function() return ScoreState() end
+        ['score'] = function() return ScoreState() end,
+        ['count'] = function() return CountdownState() end
     }
     gStateMachine:change('title')
+    gSound['music']:setLooping(true)
+    gSound['music']:play()
     -- initialize our virtual resolution
     push.setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, { upscale = 'normal' })
 end
@@ -75,11 +87,21 @@ function love.keypressed(key)
     end
 end
 
+function love.mousepressed(x, y, button)
+    love.mouse.buttonPressed[button] = true
+end
+
+function love.mouse.wasPressed(button)
+    return love.mouse.buttonPressed[button]
+end 
+    
+
 function love.update(dt)
     backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt) % BACKGROUND_LOOPING_POINT
     groundScroll = (groundScroll + GROUND_SCROLL_SPEED * dt) % BACKGROUND_LOOPING_POINT
     gStateMachine:update(dt)
     love.keyboard.keysPressed = {}
+    love.mouse.buttonPressed = {}
 end
 
 function love.keyboard.wasPressed(key)

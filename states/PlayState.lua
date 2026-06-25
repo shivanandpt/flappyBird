@@ -17,19 +17,30 @@ function PlayState:update(dt)
         self.timer = 0
     end
     self.timer = self.timer + dt
-    self.bird:update(dt)
+    
     for key, pair in pairs(self.pipePairs) do 
         pair:update(dt)
         for _, pipe in pairs(pair.pipes) do
             if self.bird:collides(pipe) then
+                gSound['explosion']:play()
+                gSound['hurt']:play()
                 gStateMachine:change('score', {
                     score = self.score
                 })
             end
         end
     end
+    if self.bird.y > VIRTUAL_HEIGHT - self.bird.height then
+        gSound['explosion']:play()
+        gSound['hurt']:play()
+        gStateMachine:change('score', {
+                score = self.score
+        })
+    end
+    self.bird:update(dt)
     for _, pair in pairs(self.pipePairs) do
         if not pair.scored and pair.x < self.bird.x + self.bird.width then
+            gSound['score']:play()
             self.score = self.score + 1
             pair.scored = true
         end
